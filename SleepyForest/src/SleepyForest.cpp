@@ -5,6 +5,7 @@
 
 #include "Walnut/Image.h"
 #include "Walnut/Random.h"
+#include "rendering/View.h"
 
 class MainLayer : public Walnut::Layer {
 public:
@@ -67,6 +68,11 @@ public:
         }
 //        ImGui::Button("Button");
         ImGui::Image(_canvas->GetDescriptorSet(), ImVec2((float) _canvas->GetWidth(), (float) _canvas->GetHeight()));
+
+        Rendering::Layer backgroundLayer;
+        backgroundLayer.setObject(Rendering::Location(10, 10),
+                                  new Rendering::RenderableObject("/home/thefra985/Desktop/photo_2020-04-03_19-25-32.jpg"));
+        activeView.pushLayer(backgroundLayer);
     }
 
     void OnUpdate(float ts) override {
@@ -81,6 +87,7 @@ public:
             for (ulong y = 0; y < _canvas->GetHeight(); y++)
                 _buffer[x + (_canvas->GetWidth() * y)] = color;
         }
+        activeView.render(_buffer, _canvas->GetWidth(), _canvas->GetHeight());
         _canvas->SetData(_buffer);
     }
 
@@ -91,6 +98,7 @@ public:
 private:
     uint32_t *_buffer = nullptr;
     std::shared_ptr<Walnut::Image> _canvas;
+    Rendering::View activeView;
     const Walnut::Application *_application;
 };
 

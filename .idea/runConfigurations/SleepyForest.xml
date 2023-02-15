@@ -1,0 +1,8 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="SleepyForest" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="SleepyForest" TARGET_NAME="SleepyForest" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="SleepyForest" RUN_TARGET_NAME="SleepyForest">
+    <method v="2">
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="Premake" run_configuration_type="BashProRunConfiguration" />
+      <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+    </method>
+  </configuration>
+</component>

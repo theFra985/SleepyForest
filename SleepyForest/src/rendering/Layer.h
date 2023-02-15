@@ -7,14 +7,19 @@
 
 #include <vector>
 #include "RenderableObject.h"
+#include "RenderingCanvas.h"
+#include <map>
 
 namespace Rendering {
 
     class Layer {
     public:
-        bool render();
+        bool render(const RenderingCanvas &canvas) const; // NOLINT(modernize-use-nodiscard)
+
+        void setObject(const Location &location, const RenderableObject *object);
+
     private:
-        std::vector<Rendering::RenderableObject> _objects;
+        std::map<Location, std::vector<const RenderableObject *>> _objects;
     };
 
 } // Rendering
