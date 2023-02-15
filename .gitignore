@@ -1,0 +1,16 @@
+# Directories
+.vs/
+bin/
+bin-int/
+cmake-build-*/
+
+# Files
+*.vcxproj
+*.vcxproj.user
+*.vcxproj.filters
+*.sln
+*.cmake
+CMakeLists.txt
+
+# Exclude
+!vendor/bin
