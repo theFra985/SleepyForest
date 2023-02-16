@@ -6,9 +6,10 @@
 
 namespace Rendering {
     bool RenderableObject::render(RenderingCanvas &canvas) const {
-        for (int x = 0; x < width; x++)
-            for (int y = 0; y < height; y++)
-                canvas.set(x, y, data[x + (y * width)]);
+//        for (int x = 0; x < width; x++)
+//            for (int y = 0; y < height; y++)
+//                canvas.set(x, y, data[x + (y * width)]);
+        canvas.copy(data, 0, 0, width, height);
         return false;
     }
 } // Rendering

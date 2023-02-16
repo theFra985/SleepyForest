@@ -6,6 +6,8 @@
 #include "Walnut/Image.h"
 #include "Walnut/Random.h"
 #include "rendering/View.h"
+#include "Walnut/Input/Input.h"
+#include "MainView.h"
 
 class MainLayer : public Walnut::Layer {
 public:
@@ -55,38 +57,37 @@ public:
 
     void RenderView() {
         auto region = ImGui::GetContentRegionAvail();
-        if (region.x == 0 || region.y == 0)
+        if (region.x <= 0 || region.y <= 0)
             return;
         if (_canvas && (region.x != (float) _canvas->GetWidth() || region.y != (float) _canvas->GetHeight())) {
+            std::cout << "Region size changed. Rebuilding frame buffer" << std::endl;
             delete[] _buffer;
             _buffer = nullptr;
         }
         if (!_buffer) {
-            delete[] _buffer;
             _buffer = new uint32_t[(ulong) (region.x * region.y)];
             _canvas = std::make_shared<Walnut::Image>(region.x, region.y, Walnut::ImageFormat::RGBA, _buffer);
         }
 //        ImGui::Button("Button");
         ImGui::Image(_canvas->GetDescriptorSet(), ImVec2((float) _canvas->GetWidth(), (float) _canvas->GetHeight()));
-
-        Rendering::Layer backgroundLayer;
-        backgroundLayer.setObject(Rendering::Location(10, 10),
-                                  new Rendering::RenderableObject("/home/thefra985/Desktop/photo_2020-04-03_19-25-32.jpg"));
-        activeView.pushLayer(backgroundLayer);
     }
 
     void OnUpdate(float ts) override {
         if (!_buffer)
             return;
+        activeView.update(ts);
 
         /*std::ios_base::fmtflags f(std::cout.flags());  // save flags state
         std::cout << std::hex << color << std::endl;
         std::cout.flags(f);  // restore flags state*/
-        for (ulong x = 0; x < _canvas->GetWidth(); x++) {
+        /*for (ulong y = 0; y < _canvas->GetHeight(); y++) {
             auto color = 0xFF000000 + ((Walnut::Random::UInt(0, 0xFF)) << 16) + ((Walnut::Random::UInt(0, 0xFF)) << 8);
-            for (ulong y = 0; y < _canvas->GetHeight(); y++)
+            for (ulong x = 0; x < _canvas->GetWidth(); x++)
                 _buffer[x + (_canvas->GetWidth() * y)] = color;
-        }
+        }*/
+        for (ulong y = 0; y < _canvas->GetHeight(); y++)
+            for (ulong x = 0; x < _canvas->GetWidth(); x++)
+                _buffer[x + (_canvas->GetWidth() * y)] = 0xFF000000;
         activeView.render(_buffer, _canvas->GetWidth(), _canvas->GetHeight());
         _canvas->SetData(_buffer);
     }
@@ -98,7 +99,7 @@ public:
 private:
     uint32_t *_buffer = nullptr;
     std::shared_ptr<Walnut::Image> _canvas;
-    Rendering::View activeView;
+    MainView activeView;
     const Walnut::Application *_application;
 };
 

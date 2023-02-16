@@ -61,6 +61,10 @@ namespace Rendering {
         bool operator<(const Location &o) const {
             return _v1 < o._v1 || (_v1 == o._v1 && _v2 < o._v2);
         }
+
+        Location operator+(const Size &size) const {
+            return {_v1 + size.getWidth(), _v2 + size.getHeight()};
+        }
     };
 
     struct BoundingBox {

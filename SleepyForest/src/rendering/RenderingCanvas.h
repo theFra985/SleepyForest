@@ -18,6 +18,12 @@ namespace Rendering {
         RenderingCanvas(uint32_t *buffer, const BoundingBox &boundingBox)
                 : _buffer(buffer), _boundingBox(boundingBox) {}
 
+        void copy(const uint32_t *data, uint32_t x, uint32_t y, uint32_t width, uint32_t height) {
+            copy(data, BoundingBox(x, y, width, height));
+        }
+
+        void copy(const uint32_t *data, const BoundingBox &target);
+
         void set(uint32_t x, uint32_t y, uint32_t color);
 
         [[nodiscard]] BoundingBox getBoundingBox() const { return _boundingBox; }
