@@ -1,0 +1,125 @@
+Subject: [PATCH] Add linux support to walnut
+---
+Index: WalnutExternal.lua
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/WalnutExternal.lua b/WalnutExternal.lua
+--- a/WalnutExternal.lua	(revision 3b8e414fdecfc6c8b58816106fe8d912bd172e31)
++++ b/WalnutExternal.lua	(date 1676305751945)
+@@ -3,20 +3,69 @@
+ VULKAN_SDK = os.getenv("VULKAN_SDK")
+
+ IncludeDir = {}
+-IncludeDir["VulkanSDK"] = "%{VULKAN_SDK}/Include"
+ IncludeDir["glm"] = "../vendor/glm"
++if os.ishost("linux") and os.istarget("linux") then
++    IncludeDir["VulkanSDK"] = "/usr/include/vulkan"
++else
++    IncludeDir["VulkanSDK"] = "%{VULKAN_SDK}/include"
++end
+
+ LibraryDir = {}
+-LibraryDir["VulkanSDK"] = "%{VULKAN_SDK}/Lib"
++if os.ishost("linux") and os.istarget("linux") then
++    LibraryDir["VulkanSDK"] = "%{VULKAN_SDK}/lib"
++else
++    LibraryDir["VulkanSDK"] = "%{VULKAN_SDK}/Lib"
++end
+
+ Library = {}
+-Library["Vulkan"] = "%{LibraryDir.VulkanSDK}/vulkan-1.lib"
++if os.ishost("linux") and os.istarget("linux") then
++    Library["Vulkan"] = "%{LibraryDir.VulkanSDK}/libvulkan.so.1"
++else
++    Library["Vulkan"] = "%{LibraryDir.VulkanSDK}/vulkan-1.lib"
++end
++
++function linux_check_if_package_is_installed(cmd, package)
++   local result, errorCode = os.outputof(cmd .. " " .. package)
++   if errorCode ~= 0 then
++      premake.error("Install " .. package .. " using package manager")
++   end
++   premake.info(package .. " is installed")
++end
+
+ group "Dependencies"
+    include "vendor/imgui"
+-   include "vendor/glfw"
++   if os.ishost("linux") and os.istarget("linux") then
++
++      if os.isfile("/usr/bin/dpkg-query") then
++         local cmd = "/usr/bin/dpkg-query -Wf"
++         linux_check_if_package_is_installed(cmd, "libglfw3-dev")
++         linux_check_if_package_is_installed(cmd, "libvulkan-dev")
++         linux_check_if_package_is_installed(cmd, "mesa-vulkan-drivers")
++         linux_check_if_package_is_installed(cmd, "vulkan-tools")
++      elseif os.isfile("/usr/bin/rpm") then
++         local cmd = "/usr/bin/rpm -qi"
++         linux_check_if_package_is_installed(cmd, "glfw-devel")
++      else
++         premake.warn("Info: Please be sure that GLFW and Vulkan SDK are installed")
++      end
++
++      vulkaninfo_dir = os.pathsearch("vulkaninfo", os.getenv("PATH"))
++      if not vulkaninfo_dir then
++         premake.warn("vulkaninfo not found. Be sure that Vulkan works.")
++      else
++         vulkaninfo = vulkaninfo_dir .. "/vulkaninfo"
++         local result, errorCode = os.outputof(vulkaninfo)
++         if errorCode ~= 0 or string.find(result, "ERROR") then
++               premake.error(vulkaninfo .. " reported an ERROR, please check")
++         end
++         premake.info(vulkaninfo .. " did not show an error, good.")
++      end
++   else
++      -- For other operating systems, build GLFW in the cloned git submodule:
++      include "vendor/glfw"
++   end
+ group ""
+
+ group "Core"
+ include "Walnut"
+-group ""
+\ No newline at end of file
++group ""
+Index: Walnut/premake5.lua
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Walnut/premake5.lua b/Walnut/premake5.lua
+--- a/Walnut/premake5.lua	(revision 3b8e414fdecfc6c8b58816106fe8d912bd172e31)
++++ b/Walnut/premake5.lua	(date 1676305961320)
+@@ -22,7 +22,7 @@
+    links
+    {
+        "ImGui",
+-       "GLFW",
++       "glfw",
+
+        "%{Library.Vulkan}",
+    }
+Index: Walnut/src/Walnut/EntryPoint.h
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Walnut/src/Walnut/EntryPoint.h b/Walnut/src/Walnut/EntryPoint.h
+--- a/Walnut/src/Walnut/EntryPoint.h	(revision 3b8e414fdecfc6c8b58816106fe8d912bd172e31)
++++ b/Walnut/src/Walnut/EntryPoint.h	(date 1676306011943)
+@@ -1,7 +1,5 @@
+ #pragma once
+
+-#ifdef WL_PLATFORM_WINDOWS
+-
+ extern Walnut::Application* Walnut::CreateApplication(int argc, char** argv);
+ bool g_ApplicationRunning = true;
+
+@@ -38,5 +36,3 @@
+ }
+
+ #endif // WL_DIST
+-
+-#endif // WL_PLATFORM_WINDOWS
