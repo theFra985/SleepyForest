@@ -16,7 +16,7 @@ namespace Rendering {
 
         virtual void update(float elapsedTime) {}
 
-        virtual bool render(uint32_t *canvas, uint32_t width, uint32_t height) const; // NOLINT(modernize-use-nodiscard)
+        virtual bool render(const Canvas &canvas, uint32_t width, uint32_t height) const;
 
         ~View();
 

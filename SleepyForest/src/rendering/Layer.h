@@ -14,15 +14,21 @@ namespace Rendering {
 
     class Layer {
     public:
-        bool render(const RenderingCanvas &canvas) const; // NOLINT(modernize-use-nodiscard)
+        explicit Layer() : size(0, 0) {}
+
+        explicit Layer(const Rendering::Size &size) : size(size) {}
+
+        virtual bool render(const RenderingCanvas &canvas) const; // NOLINT(modernize-use-nodiscard)
 
         const Location *locateObject(const RenderableObject *object);
 
         const Location *locateObject(const RenderableObject &object) { return locateObject(&object); }
 
-        void setObject(const RenderableObject *object, const Location &location);
+        bool setObject(const RenderableObject *object, const Location &location);
 
-        void setObject(const RenderableObject &object, const Location &location) { setObject(&object, location); }
+        bool setObject(const RenderableObject &object, const Location &location) {
+            return setObject(&object, location);
+        }
 
         bool moveObject(const RenderableObject *object, const Location &location);
 
@@ -31,6 +37,9 @@ namespace Rendering {
         }
 
         ~Layer();
+
+    protected:
+        const Size size;
 
     private:
         std::map<Location, std::set<const RenderableObject *>> _objects;

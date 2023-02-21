@@ -6,6 +6,7 @@
 #define SLEEPYFOREST_BINDINGBOX_H
 
 #include <cstdint>
+#include <ostream>
 
 namespace Rendering {
     struct ValuePair {
@@ -41,8 +42,16 @@ namespace Rendering {
             return _v1 == o._v1 && _v2 == o._v2;
         }
 
+        friend std::ostream &operator<<(std::ostream &o, const Size &location) {
+            return o << "{>" << location.getWidth() << " ^" << location.getHeight() << "}";
+        }
+
         bool operator<(const Size &o) const {
-            return _v1 < o._v1 || (_v1 == o._v1 && _v2 < o._v2);
+            return _v1 < o._v1 || _v2 < o._v2;
+        }
+
+        bool operator>(const Size &o) const {
+            return _v1 > o._v1 || _v2 > o._v2;
         }
     };
 
@@ -58,18 +67,45 @@ namespace Rendering {
             return _v1 == o._v1 && _v2 == o._v2;
         }
 
+        friend std::ostream &operator<<(std::ostream &o, const Location &location) {
+            return o << "<" << location.getX() << "," << location.getY() << ">";
+        }
+
         bool operator<(const Location &o) const {
             return _v1 < o._v1 || (_v1 == o._v1 && _v2 < o._v2);
         }
 
+        bool operator>(const Size &size) const {
+            return _v1 > size.getWidth() || _v2 > size.getHeight();
+        }
+
         Location operator+(const Size &size) const {
             return {_v1 + size.getWidth(), _v2 + size.getHeight()};
+        }
+
+        Location operator-(const Size &size) const {
+            return {
+                    _v1 >= size.getWidth() ? _v1 - size.getWidth() : 0,
+                    _v2 >= size.getHeight() ? _v2 - size.getHeight() : 0
+            };
+        }
+
+        friend Size operator-(const Size &size, const Location &location) {
+            return {
+                    size.getWidth() >= location.getX() ? size.getWidth() - location.getX() : 0,
+                    size.getHeight() >= location.getY() ? size.getHeight() - location.getY() : 0
+            };
         }
     };
 
     struct BoundingBox {
     public:
         BoundingBox(uint32_t x, uint32_t y) : _x(x), _y(y), _width(0), _height(0) {}
+
+        explicit BoundingBox(const Location &location)
+                : _x(location.getX()), _y(location.getY()), _width(0), _height(0) {}
+
+        explicit BoundingBox(const Size &size) : _x(0), _y(0), _width(size.getWidth()), _height(size.getHeight()) {}
 
         BoundingBox(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
                 : _x(x), _y(y), _width(width), _height(height) {}
@@ -81,6 +117,23 @@ namespace Rendering {
         [[nodiscard]] uint32_t getWidth() const { return _width; }
 
         [[nodiscard]] uint32_t getHeight() const { return _height; }
+
+        [[nodiscard]] Location getLocation() const { return Location(_x, _y); }
+
+        [[nodiscard]] Size getSize() const { return Size(_width, _height); }
+
+        /*bool operator<(const Location &location) const {
+            return location.getX() < (_x + _width) && location.getY() < (_y + _height);
+        }*/
+
+        Size operator-(const Location &location) const {
+            return {_x + _width - location.getX(), _y + _height - location.getY()};
+        }
+
+        friend bool operator>(const Location &location, const BoundingBox &boundingBox) {
+            return location.getX() > (boundingBox._x + boundingBox._width)
+                   || location.getY() > (boundingBox._y + boundingBox._height);
+        }
 
     protected:
         uint32_t _x;
@@ -109,6 +162,20 @@ namespace Rendering {
             _y = _sourceY + y;
             _width = _sourceWidth - x;
             _height = _sourceHeight - y;
+        }
+
+        void setSize(const Size &smallerSize) {
+//            if (smallerSize > Size(_width, _height))
+//                return;
+            if (_width > smallerSize.getWidth())
+                _width = smallerSize.getWidth();
+            if (_height > smallerSize.getHeight())
+                _height = smallerSize.getHeight();
+        }
+
+        void restoreSize() {
+            _width = _sourceWidth;
+            _height = _sourceHeight;
         }
 //        uint32_t setX(uint32_t x) { _x = x; }
 //

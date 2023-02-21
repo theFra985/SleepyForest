@@ -14,11 +14,15 @@ namespace Rendering {
 
     class RenderableObject {
     public:
+        Size size;
+
         explicit RenderableObject(const std::string_view imagePath)
-                : data(reinterpret_cast<uint32_t *>(
+                : size(0, 0),
+                  data(reinterpret_cast<uint32_t *>(
                                stbi_load(std::string(imagePath).c_str(), &width, &height, nullptr, 4))) {
             if (!data)
                 std::cerr << "Failed to load asset " << imagePath << std::endl;
+            size = Size(width, height);
         }
 
         bool render(RenderingCanvas &canvas) const; // NOLINT(modernize-use-nodiscard)

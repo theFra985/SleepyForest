@@ -9,7 +9,7 @@ namespace Rendering {
         _layers.push_back(layer);
     }
 
-    bool View::render(uint32_t *canvas, uint32_t width, uint32_t height) const {
+    bool View::render(const Canvas &canvas, uint32_t width, uint32_t height) const {
         RenderingCanvas target(canvas, width, height);
         for (const auto &layer: _layers)
             layer->render(target);

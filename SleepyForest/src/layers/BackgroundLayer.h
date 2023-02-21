@@ -12,7 +12,10 @@ class BackgroundLayer : public Rendering::Layer {
 public:
     const Rendering::RenderableObject image;
 
-    BackgroundLayer();
+    explicit BackgroundLayer(const Rendering::Size &size)
+            : Rendering::Layer(size), image("/home/thefra985/Tools/pixray/data/a.png") {
+        setObject(&image, Rendering::Location(25, 25));
+    }
 };
 
 

@@ -8,6 +8,7 @@
 
 #include "rendering/View.h"
 #include "layers/BackgroundLayer.h"
+#include "layers/CleanupLayer.h"
 
 class MainView : public Rendering::View {
 public:
@@ -16,10 +17,12 @@ public:
     void update(float elapsedTime) override;
 
 protected:
+    CleanupLayer clear;
+    CleanupLayer bg;
     BackgroundLayer background;
 
 private:
-    void move(const Rendering::Size &amount);
+    void move(const Rendering::Size &amount, bool positive);
 };
 
 

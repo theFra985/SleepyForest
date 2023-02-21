@@ -47,10 +47,13 @@ public:
         std::cout << "X: " << position.x << ", Y: " << position.y << ", Width: " << size.x << ", Height: " << size.y
                   << std::endl;
 #endif // DUMP_WINDOW
+//        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
         ImGui::Begin("Render View");
 //        ImGui::Begin("Hello");
         RenderView();
         ImGui::End();
+        ImGui::PopStyleVar();
 
         ImGui::ShowDemoWindow();
     }
@@ -88,7 +91,7 @@ public:
         for (ulong y = 0; y < _canvas->GetHeight(); y++)
             for (ulong x = 0; x < _canvas->GetWidth(); x++)
                 _buffer[x + (_canvas->GetWidth() * y)] = 0xFF000000;
-        activeView.render(_buffer, _canvas->GetWidth(), _canvas->GetHeight());
+        activeView.render(Rendering::Canvas(_buffer, _canvas->GetWidth()), _canvas->GetWidth(), _canvas->GetHeight());
         _canvas->SetData(_buffer);
     }
 
